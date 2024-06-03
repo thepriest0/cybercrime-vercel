@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Log</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .chat-log {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .chat-line {
+            margin-bottom: 5px;
+        }
+        .user-name {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .bot-name {
+            font-weight: bold;
+            color: #28a745;
+        }
+        a {
+            text-decoration: none;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chat Log</h1>
+        <div class="chat-log">
+            {% for line in chat_log_lines %}
+                <div class="chat-line">
+                    {% if line.startswith('User:') %}
+                        <span class="user-name">{{ user.fullname }}:</span> {{ line.replace('User:', '') }}
+                    {% elif line.startswith('Bot:') %}
+                        <span class="bot-name">Bot:</span> {{ line.replace('Bot:', '') }}
+                    {% else %}
+                        {{ line }}
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
+    </div>
+</body>
+</html>
