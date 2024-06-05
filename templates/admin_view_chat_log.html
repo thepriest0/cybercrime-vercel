@@ -69,7 +69,7 @@ text-decoration: underline;
 {% elif line.startswith('Bot:') %}
 <span class="bot-name">Bot:</span> {{ line.replace('Bot:', '') }}
 {% elif line.startswith('Evidence:') %}
-<span class="user-name">Evidence:</span> <a href="{{ url_for('uploaded_file', filename=line.replace('Evidence:', '').strip()) }}" target="_blank">View Evidence</a>
+<span class="user-name">Evidence:</span> <a href="{{ url_for('uploaded_file', filename=line.replace('Evidence:', '').strip()) }}" target="_blank">{{ line.replace('Evidence:', '').strip() }}</a>
 {% else %}
 {{ line }}
 {% endif %}
@@ -77,7 +77,7 @@ text-decoration: underline;
 {% endfor %}
 </div>
 <div class="back-link">
-<p><a href="{{ url_for('user_dashboard') }}">Go back to user dashboard</a></p>
+<p><a href="{{ url_for('admin_dashboard') }}">Go back to admin dashboard</a></p>
 </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Chat Log</title>
+    <title>Chat Log</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
             margin: 0;
             padding: 0;
             display: flex;
@@ -16,90 +16,60 @@
             height: 100vh;
         }
         .container {
-            width: 100%;
-            max-width: 600px;
-            background: #fff;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            height: 80vh;
         }
-        .chat-header {
-            padding: 15px;
-            background-color: #007bff;
-            color: #fff;
+        h1 {
             text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
+            color: #333;
+            margin-bottom: 20px;
         }
         .chat-log {
-            flex: 1;
+            background-color: #f9f9f9;
             padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-        .chat-log p {
-            margin: 10px 0;
-            padding: 10px 15px;
-            border-radius: 20px;
-            max-width: 70%;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        .chat-log p.bot {
-            background-color: #e9ecef;
-            align-self: flex-start;
-        }
-        .chat-log p.user {
-            background-color: #007bff;
-            color: #fff;
-            align-self: flex-end;
-        }
-        .chat-log p.evidence {
-            background-color: #ffc107;
-            align-self: flex-start;
-        }
-        .chat-log p.evidence a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .chat-log p.evidence a:hover {
-            text-decoration: underline;
-        }
-        /* Custom Scrollbar */
-        .chat-log {
-            scrollbar-width: thin;
-            scrollbar-color: #007bff #e9ecef;
-        }
-        .chat-log::-webkit-scrollbar {
-            width: 8px;
-        }
-        .chat-log::-webkit-scrollbar-thumb {
-            background-color: #007bff;
             border-radius: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            height: 400px;
+            overflow-y: auto;
         }
-        .chat-log::-webkit-scrollbar-track {
-            background: #e9ecef;
+        a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back-link a {
+            text-decoration: none;
+            color: #007bff;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="chat-header">
-            View Chat Log
-        </div>
+        <h1>Chat Log</h1>
         <div class="chat-log">
-            {% for line in chat_log %}
-                {% if 'Evidence:' in line %}
-                    <p class="evidence">Evidence: <a href="{{ url_for('uploaded_file', filename=line.replace('Evidence:', '').strip()) }}" target="_blank">View Evidence</a></p>
-                {% else %}
-                    <p class="{{ 'bot' if 'Bot:' in line else 'user' }}">{{ line }}</p>
-                {% endif %}
+            {% for line in chat_log_lines %}
+                <div class="chat-line">
+                    {% if line.startswith('User:') %}
+                        <span class="user-name">{{ user.fullname }}:</span> {{ line.replace('User:', '') }}
+                    {% elif line.startswith('Bot:') %}
+                        <span class="bot-name">Bot:</span> {{ line.replace('Bot:', '') }}
+                    {% else %}
+                        {{ line }}
+                    {% endif %}
+                </div>
             {% endfor %}
+        </div>
+        <div class="back-link">
+            <p><a href="{{ url_for('user_dashboard') }}">Back to User Dashboard</a></p>
         </div>
     </div>
 </body>
