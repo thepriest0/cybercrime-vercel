@@ -258,29 +258,10 @@ def report():
         session['chat_state'] += 1
 
     if request.method == 'POST':
-        if session['chat_state'] == 3:  # File upload step
-            if 'evidence_file' in request.files:
-                file = request.files['evidence_file']
-                if file and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
-                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                    file.save(file_path)
-                    session['evidence_file'] = filename
-                    session['chat_log'].append(f"User uploaded file: {filename}")
-                    session['chat_state'] += 1
-                    response = chat_flow[session['chat_state']]
-                else:
-                    response = "Invalid file type. Please upload a valid file."
-            else:
-                response = "No file uploaded. Please upload a file."
-        else:
-            user_input = request.form['user_input']
+        if session['chat_state'] == 4:  # File upload step is already done, final step
+            user_input = request.form.get('user_input')
             session['chat_log'].append(f"User: {user_input}")
-            session['chat_state'] += 1
-            if session['chat_state'] < len(chat_flow):
-                response = chat_flow[session['chat_state']]
-                session['chat_log'].append(f"Bot: {response}")
-            else:
+            if user_input.lower() == 'done':
                 new_report = Report(
                     user_id=session['user_id'],
                     chat_log='\n'.join(session['chat_log']),
@@ -292,6 +273,39 @@ def report():
                 session.pop('chat_log')
                 session.pop('evidence_file', None)
                 return redirect(url_for('user_dashboard'))
+            else:
+                response = "Please type 'done' to finish the report."
+        elif session['chat_state'] == 3:  # File upload step
+            if 'evidence_file' in request.files:
+                file = request.files['evidence_file']
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                    session['evidence_file'] = filename
+                    session['chat_log'].append(f"User uploaded file: {filename}")
+                    session['chat_state'] += 1
+                    response = chat_flow[session['chat_state']]
+                    session['chat_log'].append(f"Bot: {response}")
+                else:
+                    response = "Invalid file type. Please upload a valid file."
+            else:
+                response = "No file uploaded. Please upload a file."
+        elif session['chat_state'] == 1:  # Date entry step
+            user_input = request.form.get('user_input')
+            session['chat_log'].append(f"User: {user_input}")
+            session['chat_state'] += 1
+            response = chat_flow[session['chat_state']]
+            session['chat_log'].append(f"Bot: {response}")
+        else:
+            user_input = request.form['user_input']
+            session['chat_log'].append(f"User: {user_input}")
+            session['chat_state'] += 1
+            if session['chat_state'] < len(chat_flow):
+                response = chat_flow[session['chat_state']]
+                session['chat_log'].append(f"Bot: {response}")
+            else:
+                response = "Please type 'done' to finish the report."
 
         return render_template('report.html', chat_log=session['chat_log'], response=response)
 
