@@ -28,7 +28,7 @@ class Report(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     chat_log = db.Column(db.Text, nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    evidence_file = db.Column(db.String(200), nullable=True)
+    evidence_filename = db.Column(db.String(200), nullable=True)
 
 @app.route('/')
 def index():
@@ -257,7 +257,7 @@ def report():
     if 'chat_state' not in session:
         session['chat_state'] = 0
         session['chat_log'] = []
-        session['evidence_file'] = None
+        session['evidence_filename'] = None
         session['chat_log'].append(f"Bot: {chat_flow[session['chat_state']]}")
         session['chat_state'] += 1
 
@@ -269,24 +269,24 @@ def report():
                 new_report = Report(
                     user_id=session['user_id'],
                     chat_log='\n'.join(session['chat_log']),
-                    evidence_file=session.get('evidence_file', None)
+                    evidence_filename=session.get('evidence_file', None)  # Store filename here
                 )
                 db.session.add(new_report)
                 db.session.commit()
                 session.pop('chat_state')
                 session.pop('chat_log')
-                session.pop('evidence_file', None)
+                session.pop('evidence_filename', None)
                 return redirect(url_for('user_dashboard'))
             else:
                 response = "Please type 'done' to finish the report."
         elif session['chat_state'] == 3:  # File upload step
-            if 'evidence_file' in request.files:
-                file = request.files['evidence_file']
+            if 'evidence_filename' in request.files:
+                file = request.files['evidence_filename']
                 if file and allowed_file(file.filename):
                     filename = secure_filename(file.filename)
                     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                     file.save(file_path)
-                    session['evidence_file'] = filename
+                    session['evidence_filename'] = filename
                     session['chat_log'].append(f"User uploaded file: {filename}")
                     session['chat_state'] += 1
                     response = chat_flow[session['chat_state']]
