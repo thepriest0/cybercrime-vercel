@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime
@@ -232,6 +232,10 @@ def admin_view_chat_log(report_id):
 
     chat_log_lines = report.chat_log.split('\n')
     return render_template('admin_view_chat_log.html', report=report, user=user, chat_log_lines=chat_log_lines)
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 chat_flow = [
     "Hi! I'm your report assistant, Can you fully describe what happened?",
