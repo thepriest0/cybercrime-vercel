@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
+    <title>User Settings</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -59,11 +59,23 @@
             text-decoration: none;
             color: #007bff;
         }
-        .welcome {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 24px;
-            color: #007bff;
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        input[type="text"], input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
         .btn {
             display: inline-block;
@@ -77,37 +89,6 @@
         .btn:hover {
             background-color: #0056b3;
         }
-        .logout {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .logout a {
-            text-decoration: none;
-            color: #dc3545;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background-color: #fff;
-            border-radius: 5px;
-            overflow: hidden;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #007bff;
-            color: #fff;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
-        }
     </style>
 </head>
 <body>
@@ -119,38 +100,20 @@
     </div>
     <div class="content">
         <div class="header">
-            <h1>Dashboard</h1>
+            <h1>Settings</h1>
         </div>
-        <div class="welcome">
-            <p>Welcome, {{ user.fullname }}!</p>
-        </div>
-        <div class="report-button">
-            <a href="{{ url_for('report') }}" class="btn">Make a Report</a>
-        </div>
-        <div class="report-history">
-            <h2>Your Report History</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Chat Log</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for report in reports %}
-                    <tr>
-                        <td>{{ report.date.strftime('%Y-%m-%d') }}</td>
-                        <td>{{ report.chat_log[:50] }}...</td>
-                        <td><a href="{{ url_for('user_view_chat_log', report_id=report.id) }}">View Chat Log</a></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="logout">
-            <p><a href="{{ url_for('logout') }}">Logout</a></p>
-        </div>
+        <form method="POST">
+            <label for="fullname">Full Name</label>
+            <input type="text" id="fullname" name="fullname" value="{{ user.fullname }}" required>
+            
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" value="{{ user.email }}" required>
+            
+            <label for="password">New Password (leave blank if not changing)</label>
+            <input type="password" id="password" name="password">
+            
+            <button type="submit" class="btn">Save Changes</button>
+        </form>
     </div>
 </body>
 </html>

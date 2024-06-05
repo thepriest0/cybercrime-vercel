@@ -63,11 +63,31 @@ def logout():
 def user_dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    
+
     user_id = session['user_id']
-    user = User.query.get(user_id)
+    current_user = User.query.get(user_id)
     reports = Report.query.filter_by(user_id=user_id).order_by(Report.date.desc()).all()
-    return render_template('user_dashboard.html', user=user, reports=reports)
+
+    return render_template('user_dashboard.html', user=current_user, reports=reports)
+
+@app.route('/user_settings', methods=['GET', 'POST'])
+def user_settings():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    current_user = User.query.get(user_id)
+
+    if request.method == 'POST':
+        current_user.fullname = request.form['fullname']
+        current_user.email = request.form['email']
+        if request.form['password']:
+            current_user.password = generate_password_hash(request.form['password'], method='pbkdf2:sha256')
+
+        db.session.commit()
+        return redirect(url_for('user_settings'))
+
+    return render_template('user_settings.html', user=current_user)
 
 @app.route('/admin_dashboard')
 def admin_dashboard():
@@ -163,9 +183,10 @@ def delete_report(report_id):
         db.session.delete(report)
         db.session.commit()
     return redirect(url_for('admin_reports'))
+    
 
-@app.route('/view_chat_log/<int:report_id>')
-def view_chat_log(report_id):
+@app.route('/user_view_chat_log/<int:report_id>')
+def user_view_chat_log(report_id):
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
@@ -179,14 +200,32 @@ def view_chat_log(report_id):
 
     current_user = User.query.get(session['user_id'])
 
-    chat_log_lines = report.chat_log.split('\n')
+    if report.user_id != current_user.id:
+        return "Unauthorized access", 403
 
-    if current_user.is_admin:
-        return render_template('view_chat_log.html', report=report, user=user, chat_log_lines=chat_log_lines)
-    else:
-        if report.user_id != current_user.id:
-            return "Unauthorized access", 403
-        return render_template('user_view_chat_log.html', report=report, user=user, chat_log_lines=chat_log_lines)
+    chat_log_lines = report.chat_log.split('\n')
+    return render_template('user_view_chat_log.html', report=report, user=user, chat_log_lines=chat_log_lines)
+
+@app.route('/admin_view_chat_log/<int:report_id>')
+def admin_view_chat_log(report_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    current_user = User.query.get(user_id)
+    if not current_user.is_admin:
+        return redirect(url_for('login'))
+
+    report = Report.query.get(report_id)
+    if not report:
+        return "Report not found", 404
+
+    user = User.query.get(report.user_id)
+    if not user:
+        return "User not found", 404
+
+    chat_log_lines = report.chat_log.split('\n')
+    return render_template('admin_view_chat_log.html', report=report, user=user, chat_log_lines=chat_log_lines)
 
 chat_flow = [
     "What type of Cybercrime are you reporting?",

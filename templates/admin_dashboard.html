@@ -4,37 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             background-color: #f0f0f0;
             margin: 0;
-            padding: 0;
+            display: flex;
+            height: 100vh;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+        .sidebar {
+            width: 250px;
+            background-color: #343a40;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             padding: 20px;
+        }
+        .sidebar h2 {
+            margin: 20px 0;
+        }
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            width: 100%;
+            padding: 10px 20px;
+            margin: 5px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            color: #333;
+        }
+        .header a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .stat-card {
             background-color: #fff;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
+            padding: 20px;
             text-align: center;
-            color: #333;
+            flex: 1;
+            margin: 0 10px;
         }
-        h2 {
-            margin-top: 30px;
+        .stat-card h3 {
+            margin: 10px 0;
+        }
+        .stat-card i {
+            font-size: 2em;
+            color: #007bff;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            background-color: #fff;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         th, td {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
+            padding: 15px;
             text-align: left;
+            border-bottom: 1px solid #ddd;
         }
         th {
             background-color: #007bff;
@@ -43,17 +100,43 @@
         tr:hover {
             background-color: #f5f5f5;
         }
-        a {
-            text-decoration: none;
+        a.table-action {
             color: #007bff;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Admin Dashboard</h1>
-        <p>Welcome, Admin!</p>
-        <h2>Reports</h2>
+    <div class="sidebar">
+        <h2>Admin</h2>
+        <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('admin_reports') }}">Reports</a>
+        <a href="{{ url_for('admin_users') }}">Users</a>
+        <a href="{{ url_for('admin_settings') }}">Settings</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+    <div class="content">
+        <div class="header">
+            <h1>Dashboard</h1>
+        </div>
+        <div class="stats">
+            <div class="stat-card">
+                <i class="fas fa-users"></i>
+                <h3>{{ total_users }}</h3>
+                <p>Total Users</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-file-alt"></i>
+                <h3>{{ total_reports }}</h3>
+                <p>Total Reports</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-eye"></i>
+                <h3>{{ visits }}</h3>
+                <p>Visits</p>
+            </div>
+        </div>
+        <h2>Users</h2>
         <table>
             <thead>
                 <tr>
@@ -63,16 +146,15 @@
                 </tr>
             </thead>
             <tbody>
-                {% for report in reports %}
+                {% for user in users %}
                     <tr>
-                        <td>{{ report.user.fullname }}</td>
-                        <td>{{ report.user.email }}</td>
-                        <td><a href="{{ url_for('view_chat_log', report_id=report.id) }}">View Chat Log</a></td>
+                        <td>{{ user.fullname }}</td>
+                        <td>{{ user.email }}</td>
+                        <td><a href="{{ url_for('delete_user', user_id=user.id) }}" class="table-action">Delete User</a></td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
-        <p><a href="{{ url_for('logout') }}">Logout</a></p>
     </div>
 </body>
 </html>
