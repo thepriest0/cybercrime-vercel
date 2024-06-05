@@ -76,11 +76,11 @@ text-decoration: underline;
 <div class="chat-line">
     <span class="user-name">Evidence:</span>
     {% if report.evidence_filename %}
-        <a href="/uploads/{{ report.evidence_filename }}" target="_blank">View Evidence</a>
+    <a href="{{ url_for('uploaded_file', filename=report.evidence_filename) }}" target="_blank">View Evidence</a>
     {% else %}
-        No evidence file uploaded
+    No evidence file uploaded
     {% endif %}
-</div>
+  </div>
 </div>
 <div class="back-link">
 <p><a href="{{ url_for('admin_dashboard') }}">Go back to admin dashboard</a></p>
