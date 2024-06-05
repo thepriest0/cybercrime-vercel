@@ -40,6 +40,7 @@
         .content {
             flex-grow: 1;
             padding: 20px;
+            overflow-y: auto;
         }
         .header {
             display: flex;
@@ -63,6 +64,7 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         .stat-card {
             background-color: #fff;
@@ -71,7 +73,8 @@
             padding: 20px;
             text-align: center;
             flex: 1;
-            margin: 0 10px;
+            margin: 10px;
+            min-width: 150px;
         }
         .stat-card h3 {
             margin: 10px 0;
@@ -104,10 +107,74 @@
             color: #007bff;
             text-decoration: none;
         }
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            .body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: fixed;
+                top: 0;
+                left: -100%;
+                transition: left 0.3s ease;
+                z-index: 1000;
+            }
+            .sidebar.active {
+                left: 0;
+            }
+            .sidebar h2 {
+                display: none;
+            }
+            .sidebar a {
+                padding: 10px;
+                text-align: left;
+            }
+            .content {
+                margin-top: 60px;
+                padding: 20px 10px;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header h1 {
+                margin-bottom: 10px;
+            }
+            .stats {
+                flex-direction: column;
+                align-items: center;
+            }
+            .stat-card {
+                margin: 10px 0;
+                width: 100%;
+            }
+            table {
+                display: block;
+                overflow-x: auto;
+                width: 100%;
+            }
+            table thead, table tbody {
+                display: block;
+            }
+            table thead {
+                float: left;
+                margin-right: 10px;
+            }
+            table tbody {
+                white-space: nowrap;
+            }
+            table th, table td {
+                white-space: nowrap;
+                display: inline-block;
+                min-width: 100px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
         <h2>Admin</h2>
         <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
         <a href="{{ url_for('admin_reports') }}">Reports</a>
@@ -118,6 +185,7 @@
     <div class="content">
         <div class="header">
             <h1>Dashboard</h1>
+            <button id="menu-toggle" class="menu-toggle"><i class="fas fa-bars"></i></button>
         </div>
         <div class="stats">
             <div class="stat-card">
@@ -156,5 +224,12 @@
             </tbody>
         </table>
     </div>
+
+    <script>
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            var sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        });
+    </script>
 </body>
 </html>
