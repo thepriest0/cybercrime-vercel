@@ -1,13 +1,19 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'doc', 'docx'}
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -22,6 +28,7 @@ class Report(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     chat_log = db.Column(db.Text, nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    evidence_file = db.Column(db.String(200), nullable=True)
 
 @app.route('/')
 def index():
@@ -93,7 +100,7 @@ def user_settings():
 def admin_dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    
+
     user_id = session['user_id']
     current_user = User.query.get(user_id)
     if not current_user.is_admin:
@@ -132,7 +139,7 @@ def admin_settings():
 def admin_reports():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    
+
     user_id = session['user_id']
     current_user = User.query.get(user_id)
     if not current_user.is_admin:
@@ -145,7 +152,7 @@ def admin_reports():
 def admin_users():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    
+
     user_id = session['user_id']
     current_user = User.query.get(user_id)
     if not current_user.is_admin:
@@ -183,7 +190,6 @@ def delete_report(report_id):
         db.session.delete(report)
         db.session.commit()
     return redirect(url_for('admin_reports'))
-    
 
 @app.route('/user_view_chat_log/<int:report_id>')
 def user_view_chat_log(report_id):
@@ -228,48 +234,74 @@ def admin_view_chat_log(report_id):
     return render_template('admin_view_chat_log.html', report=report, user=user, chat_log_lines=chat_log_lines)
 
 chat_flow = [
-    "What type of Cybercrime are you reporting?",
-    "Can you explain in full details?",
-    "Please provide your contact number?",
-    "Thank you for reporting, please type done to confirm."
+    "Hi! I'm your report assistant, Can you fully describe what happened?",
+    "When did this happen? Please reply with the date.",
+    "Please enter your contact number.",
+    "Please upload evidence of the incident.",
+    "Report received. Please type 'done' to finish."
 ]
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 @app.route('/report', methods=['GET', 'POST'])
 def report():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    
-    if request.method == 'POST':
-        user_input = request.form['user_input']
-        session['chat_log'].append(f"User: {user_input}")
 
-        if session['chat_state'] < len(chat_flow):
-            response = chat_flow[session['chat_state']]
-            session['chat_state'] += 1
-            session['chat_log'].append(f"Bot: {response}")
-        else:
-            response = "Thank you for the information. Your report has been submitted."
-            new_report = Report(user_id=session['user_id'], chat_log='\n'.join(session['chat_log']))
-            db.session.add(new_report)
-            db.session.commit()
-            session.pop('chat_state')
-            session.pop('chat_log')
-            return redirect(url_for('user_dashboard'))
-
-        return render_template('report.html', chat_log=session['chat_log'], response=response)
-    
     if 'chat_state' not in session:
         session['chat_state'] = 0
         session['chat_log'] = []
-        response = chat_flow[session['chat_state']]
-        session['chat_log'].append(f"Bot: {response}")
+        session['evidence_file'] = None
+        session['chat_log'].append(f"Bot: {chat_flow[session['chat_state']]}")
         session['chat_state'] += 1
-    else:
-        response = chat_flow[session['chat_state']]
 
+    if request.method == 'POST':
+        if session['chat_state'] == 3:  # File upload step
+            if 'evidence_file' in request.files:
+                file = request.files['evidence_file']
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                    session['evidence_file'] = filename
+                    session['chat_log'].append(f"User uploaded file: {filename}")
+                    session['chat_state'] += 1
+                    response = chat_flow[session['chat_state']]
+                else:
+                    response = "Invalid file type. Please upload a valid file."
+            else:
+                response = "No file uploaded. Please upload a file."
+        else:
+            user_input = request.form['user_input']
+            session['chat_log'].append(f"User: {user_input}")
+            session['chat_state'] += 1
+            if session['chat_state'] < len(chat_flow):
+                response = chat_flow[session['chat_state']]
+                session['chat_log'].append(f"Bot: {response}")
+            else:
+                new_report = Report(
+                    user_id=session['user_id'],
+                    chat_log='\n'.join(session['chat_log']),
+                    evidence_file=session.get('evidence_file', None)
+                )
+                db.session.add(new_report)
+                db.session.commit()
+                session.pop('chat_state')
+                session.pop('chat_log')
+                session.pop('evidence_file', None)
+                return redirect(url_for('user_dashboard'))
+
+        return render_template('report.html', chat_log=session['chat_log'], response=response)
+
+    response = chat_flow[session['chat_state']]
     return render_template('report.html', chat_log=session['chat_log'], response=response)
 
 if __name__ == '__main__':
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.makedirs(app.config['UPLOAD_FOLDER'])
+
     with app.app_context():
         db.create_all()
 

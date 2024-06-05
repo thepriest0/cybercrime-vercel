@@ -76,6 +76,16 @@
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
             margin-right: 10px;
         }
+        .chat-input input[type="file"] {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: #fff;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            margin-right: 10px;
+        }
         .chat-input button {
             padding: 10px 20px;
             background-color: #007bff;
@@ -90,7 +100,6 @@
         .chat-input button:hover {
             background-color: #0056b3;
         }
-        /* Custom Scrollbar */
         .chat-log {
             scrollbar-width: thin;
             scrollbar-color: #007bff #e9ecef;
@@ -108,19 +117,23 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="chat-header">
-            Report Cybercrime
-        </div>
-        <div class="chat-log">
-            {% for line in chat_log %}
-                <p class="{{ 'bot' if 'Bot:' in line else 'user' }}">{{ line }}</p>
-            {% endfor %}
-        </div>
-        <form action="{{ url_for('report') }}" method="post" class="chat-input">
-            <input type="text" name="user_input" placeholder="Type your message here..." required>
-            <button type="submit">Send</button>
-        </form>
+<div class="container">
+    <div class="chat-header">
+        Report Cybercrime
     </div>
+    <div class="chat-log">
+        {% for line in chat_log %}
+        <p class="{{ 'bot' if 'Bot:' in line else 'user' }}">{{ line }}</p>
+        {% endfor %}
+    </div>
+    <form action="{{ url_for('report') }}" method="post" class="chat-input" enctype="multipart/form-data">
+        {% if session['chat_state'] == 3 %}
+        <input type="file" name="evidence_file" accept=".png,.jpg,.jpeg,.gif,.pdf,.doc,.docx" required>
+        {% else %}
+        <input type="text" name="user_input" placeholder="Type your message here..." required>
+        {% endif %}
+        <button type="submit">Send</button>
+    </form>
+</div>
 </body>
 </html>
