@@ -108,7 +108,7 @@ def admin_dashboard():
 
     total_users = User.query.count()
     total_reports = Report.query.count()
-    visits = 0  # Implement a visit count logic if necessary
+    visits = 0 # Implement a visit count logic if necessary
 
     return render_template('admin_dashboard.html', total_users=total_users, total_reports=total_reports, visits=visits)
 
@@ -249,6 +249,18 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
+@app.route('/test_url/<filename>')
+def test_url(filename):
+    try:
+        file_url = url_for('uploaded_file', filename=filename)
+        return f"URL: {file_url}"
+    except Exception as e:
+        return str(e)
+
+@app.route('/test_template/<filename>')
+def test_template(filename):
+    return render_template('test_template.html', filename=filename)
+
 @app.route('/report', methods=['GET', 'POST'])
 def report():
     if 'user_id' not in session:
@@ -262,14 +274,14 @@ def report():
         session['chat_state'] += 1
 
     if request.method == 'POST':
-        if session['chat_state'] == 4:  # File upload step is already done, final step
+        if session['chat_state'] == 4: # Final step
             user_input = request.form.get('user_input')
             session['chat_log'].append(f"User: {user_input}")
             if user_input.lower() == 'done':
                 new_report = Report(
                     user_id=session['user_id'],
                     chat_log='\n'.join(session['chat_log']),
-                    evidence_filename=session.get('evidence_file', None)  # Store filename here
+                    evidence_filename=session.get('evidence_filename') # Ensure filename is stored here
                 )
                 db.session.add(new_report)
                 db.session.commit()
@@ -279,7 +291,7 @@ def report():
                 return redirect(url_for('user_dashboard'))
             else:
                 response = "Please type 'done' to finish the report."
-        elif session['chat_state'] == 3:  # File upload step
+        elif session['chat_state'] == 3: # File upload step
             if 'evidence_filename' in request.files:
                 file = request.files['evidence_filename']
                 if file and allowed_file(file.filename):
@@ -295,12 +307,6 @@ def report():
                     response = "Invalid file type. Please upload a valid file."
             else:
                 response = "No file uploaded. Please upload a file."
-        elif session['chat_state'] == 1:  # Date entry step
-            user_input = request.form.get('user_input')
-            session['chat_log'].append(f"User: {user_input}")
-            session['chat_state'] += 1
-            response = chat_flow[session['chat_state']]
-            session['chat_log'].append(f"Bot: {response}")
         else:
             user_input = request.form['user_input']
             session['chat_log'].append(f"User: {user_input}")
@@ -310,27 +316,14 @@ def report():
                 session['chat_log'].append(f"Bot: {response}")
             else:
                 response = "Please type 'done' to finish the report."
+    else:
+        response = chat_flow[session['chat_state']]
 
-        return render_template('report.html', chat_log=session['chat_log'], response=response)
-
-    response = chat_flow[session['chat_state']]
     return render_template('report.html', chat_log=session['chat_log'], response=response)
 
 if __name__ == '__main__':
+    if not os.path.exists('database.db'):
+        db.create_all()
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
         os.makedirs(app.config['UPLOAD_FOLDER'])
-
-    with app.app_context():
-        db.create_all()
-
-        if not User.query.filter_by(email='admin@example.com').first():
-            admin_user = User(
-                fullname='Admin User',
-                email='admin@example.com',
-                password=generate_password_hash('159369258', method='pbkdf2:sha256'),
-                is_admin=True
-            )
-            db.session.add(admin_user)
-            db.session.commit()
-
     app.run(debug=True)
