@@ -75,11 +75,7 @@ text-decoration: underline;
 {% endfor %}
 <div class="chat-line">
     <span class="user-name">Evidence:</span>
-    {% if report.evidence_filename %}
     <a href="{{ url_for('uploaded_file', filename=report.evidence_filename) }}" target="_blank">View Evidence</a>
-    {% else %}
-    No evidence file uploaded
-    {% endif %}
   </div>
 </div>
 <div class="back-link">
