@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-P4vHgq6I2zTY6k7dZK0H+jaEDFX60a7EU6SppxkPz+HvG1tPcf91N4jU/1GQMzSTU/80klZTecbJKcVZyewFnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crime Reporting System</title>
+    <title>Cybercrime Reporting System</title>
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
-            background-image: url('https://www.publicdomainpictures.net/pictures/320000/nahled/background-image.png');
-            background-size: cover;
+            font-family: 'Open Sans', sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
             margin: 0;
             padding: 0;
             display: flex;
@@ -17,53 +18,43 @@
             justify-content: center;
             height: 100vh;
         }
-        .overlay {
-            background-color: rgba(0, 0, 0, 0.5);
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 1;
-        }
         .container {
-            position: relative;
-            z-index: 2;
-            max-width: 600px;
-            padding: 40px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
             text-align: center;
+            max-width: 600px;
+            padding: 20px;
         }
         h1 {
-            color: #333;
-            font-size: 2.5em;
+            font-size: 2em;
             margin-bottom: 20px;
         }
         p {
-            color: #555;
             font-size: 1.2em;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            line-height: 1.6;
         }
-        a {
+        a.button {
+            display: inline-block;
             text-decoration: none;
-            color: #fff;
-            background-color: #007bff;
-            padding: 10px 20px;
+            color: #ffffff;
+            background-color: #00a85a;
+            padding: 15px 30px;
             border-radius: 5px;
-            transition: background-color 0.3s;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
         }
-        a:hover {
-            background-color: #0056b3;
+        a.button:hover {
+            background-color: #007b3a;
+        }
+        a.button i {
+            margin-left: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="overlay"></div>
     <div class="container">
-        <h1>Welcome to the Crime Reporting System</h1>
-        <p><a href="{{ url_for('login') }}">Login</a> or <a href="{{ url_for('register') }}">Register</a></p>
+        <h1>Report Cybercrimes. Protect Online Communities.</h1>
+        <p>Welcome to the Cybercrime Reporting System, your trusted platform for reporting and addressing cybercrimes effectively. Our system empowers individuals like you to take action against online threats, whether it's fraud, phishing, or other malicious activities. Together, let's create a safer digital world for everyone.</p>
+        <a href="login.html" class="button">Report a Cybercrime <i class="fas fa-arrow-right"></i></a>
     </div>
 </body>
 </html>

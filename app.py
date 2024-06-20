@@ -135,7 +135,7 @@ def admin_settings():
 
     return render_template('admin_settings.html', admin_email=current_user.email)
 
-@app.route('/admin_reports')
+@app.route('/admin/reports', methods=['GET'])
 def admin_reports():
     if 'user_id' not in session:
         return redirect(url_for('login'))
@@ -145,8 +145,35 @@ def admin_reports():
     if not current_user.is_admin:
         return redirect(url_for('login'))
 
-    reports = Report.query.order_by(Report.date.desc()).all()
-    return render_template('admin_reports.html', reports=reports)
+    search_query = request.args.get('search', '')
+    sort_by = request.args.get('sort_by', 'id')
+    sort_order = request.args.get('sort_order', 'asc')
+
+    query = Report.query.join(User)
+
+    if search_query:
+        if search_query.isdigit() and sort_by == 'id':
+            query = query.filter(Report.id.like(f'%{search_query}%'))
+        elif sort_by == 'date':
+            query = query.filter(Report.date.like(f'%{search_query}%'))
+        else:
+            query = query.filter(
+                (User.fullname.like(f'%{search_query}%')) | 
+                (User.email.like(f'%{search_query}%')) | 
+                (Report.chat_log.like(f'%{search_query}%'))
+            )
+
+    if sort_by == 'id':
+        query = query.order_by(Report.id.desc() if sort_order == 'desc' else Report.id.asc())
+    elif sort_by == 'fullname':
+        query = query.order_by(User.fullname.desc() if sort_order == 'desc' else User.fullname.asc())
+    elif sort_by == 'email':
+        query = query.order_by(User.email.desc() if sort_order == 'desc' else User.email.asc())
+    elif sort_by == 'date':
+        query = query.order_by(Report.date.desc() if sort_order == 'desc' else Report.date.asc())
+
+    reports = query.all()
+    return render_template('admin_reports.html', reports=reports, search_query=search_query, sort_by=sort_by, sort_order=sort_order)
 
 @app.route('/admin_users')
 def admin_users():
@@ -261,69 +288,7 @@ def test_url(filename):
 def test_template(filename):
     return render_template('test_template.html', filename=filename)
 
-@app.route('/report', methods=['GET', 'POST'])
-def report():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-
-    if 'chat_state' not in session:
-        session['chat_state'] = 0
-        session['chat_log'] = []
-        session['evidence_filename'] = None
-        session['chat_log'].append(f"Bot: {chat_flow[session['chat_state']]}")
-        session['chat_state'] += 1
-
-    if request.method == 'POST':
-        if session['chat_state'] == 4: # Final step
-            user_input = request.form.get('user_input')
-            session['chat_log'].append(f"User: {user_input}")
-            if user_input.lower() == 'done':
-                new_report = Report(
-                    user_id=session['user_id'],
-                    chat_log='\n'.join(session['chat_log']),
-                    evidence_filename=session.get('evidence_filename') # Ensure filename is stored here
-                )
-                db.session.add(new_report)
-                db.session.commit()
-                session.pop('chat_state')
-                session.pop('chat_log')
-                session.pop('evidence_filename', None)
-                return redirect(url_for('user_dashboard'))
-            else:
-                response = "Please type 'done' to finish the report."
-        elif session['chat_state'] == 3: # File upload step
-            if 'evidence_filename' in request.files:
-                file = request.files['evidence_filename']
-                if file and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
-                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                    file.save(file_path)
-                    session['evidence_filename'] = filename
-                    session['chat_log'].append(f"User uploaded file: {filename}")
-                    session['chat_state'] += 1
-                    response = chat_flow[session['chat_state']]
-                    session['chat_log'].append(f"Bot: {response}")
-                else:
-                    response = "Invalid file type. Please upload a valid file."
-            else:
-                response = "No file uploaded. Please upload a file."
-        else:
-            user_input = request.form['user_input']
-            session['chat_log'].append(f"User: {user_input}")
-            session['chat_state'] += 1
-            if session['chat_state'] < len(chat_flow):
-                response = chat_flow[session['chat_state']]
-                session['chat_log'].append(f"Bot: {response}")
-            else:
-                response = "Please type 'done' to finish the report."
-    else:
-        response = chat_flow[session['chat_state']]
-
-    return render_template('report.html', chat_log=session['chat_log'], response=response)
-
 if __name__ == '__main__':
-    if not os.path.exists('database.db'):
-        db.create_all()
-    if not os.path.exists(app.config['UPLOAD_FOLDER']):
-        os.makedirs(app.config['UPLOAD_FOLDER'])
+    with app.app_context():
+        db.create_all()  # Create tables for all models
     app.run(debug=True)

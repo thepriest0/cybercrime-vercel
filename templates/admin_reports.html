@@ -83,6 +83,23 @@
         .btn-danger:hover {
             background-color: darkred;
         }
+        .search-sort-form {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .search-sort-form input[type="text"] {
+            padding: 5px;
+            width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        .search-sort-form select, .search-sort-form button {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -96,9 +113,26 @@
     <div class="main-content">
         <div class="container">
             <h1>Admin Reports</h1>
+            
+            <form method="GET" action="{{ url_for('admin_reports') }}" class="search-sort-form">
+                <input type="text" name="search" placeholder="Search" value="{{ request.args.get('search', '') }}">
+                <select name="sort_by">
+                    <option value="id" {% if request.args.get('sort_by') == 'id' %}selected{% endif %}>ID</option>
+                    <option value="fullname" {% if request.args.get('sort_by') == 'fullname' %}selected{% endif %}>User Name</option>
+                    <option value="email" {% if request.args.get('sort_by') == 'email' %}selected{% endif %}>Email</option>
+                    <option value="date" {% if request.args.get('sort_by') == 'date' %}selected{% endif %}>Date</option>
+                </select>
+                <select name="sort_order">
+                    <option value="asc" {% if request.args.get('sort_order') == 'asc' %}selected{% endif %}>Ascending</option>
+                    <option value="desc" {% if request.args.get('sort_order') == 'desc' %}selected{% endif %}>Descending</option>
+                </select>
+                <button type="submit">Search and Sort</button>
+            </form>
+
             <table>
                 <thead>
                     <tr>
+                        <th>Report ID</th>
                         <th>Full Name</th>
                         <th>Email Address</th>
                         <th>Date</th>
@@ -108,6 +142,7 @@
                 <tbody>
                     {% for report in reports %}
                     <tr>
+                        <td>{{ report.id }}</td>
                         <td>{{ report.user.fullname }}</td>
                         <td>{{ report.user.email }}</td>
                         <td>{{ report.date }}</td>
