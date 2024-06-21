@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+import logging
 import os
 from werkzeug.utils import secure_filename
 
@@ -42,9 +43,16 @@ def register():
         email = request.form['email']
         password = request.form['password']
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+        
+        # Check if user already exists
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            # Handle the case where the user already exists
+            return "User with this email already exists."
+
         user = User(fullname=fullname, email=email, password=hashed_password)
         db.session.add(user)
-        db.session.commit()
+        db.session.commit()  # Commit the user to the database
         return redirect(url_for('login'))
     return render_template('register.html')
 
@@ -65,6 +73,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
+    logging.debug("User logged out")
     return redirect(url_for('index'))
 
 @app.route('/user_dashboard')
@@ -370,7 +379,18 @@ def report():
             response = chat_flow[session['chat_state']]
             session['chat_log'].append(f"Bot: {response}")
         else:
-            response = "Please type 'done' to finish the report."
+            user_id = session['user_id']
+            new_report = Report(
+                user_id=user_id,
+                chat_log="\n".join(session['chat_log']),
+                evidence_filename=session['evidence_filename']
+            )
+            db.session.add(new_report)
+            db.session.commit()  # Commit the report to the database
+            response = "Your report has been successfully submitted. Thank you!"
+            session.pop('chat_state')
+            session.pop('chat_log')
+            session.pop('evidence_filename')
 
         return render_template('report.html', chat_log=session['chat_log'], response=response)
 
