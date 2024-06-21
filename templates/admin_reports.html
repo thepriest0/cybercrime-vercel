@@ -63,7 +63,7 @@
         tr:hover {
             background-color: #f5f5f5;
         }
-        .btn-primary, .btn-danger, .btn-secondary {
+        .icon-btn {
             padding: 5px 10px;
             border: none;
             border-radius: 3px;
@@ -71,26 +71,23 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        .btn-primary {
+        .icon-btn-primary {
             background-color: #007bff;
         }
-        .btn-primary:hover {
+        .icon-btn-primary:hover {
             background-color: #0056b3;
         }
-        .btn-danger {
+        .icon-btn-danger {
             background-color: red;
         }
-        .btn-danger:hover {
+        .icon-btn-danger:hover {
             background-color: darkred;
         }
-        .btn-secondary {
-            background-color: grey;
+        .icon-btn-success {
+            background-color: green;
         }
-        .btn-secondary:hover {
-            background-color: darkgrey;
-        }
-        .btn {
-            margin-right: 5px;
+        .icon-btn-success:hover {
+            background-color: darkgreen;
         }
     </style>
 </head>
@@ -150,16 +147,16 @@
                                 </select>
                             </td>
                             <td>
-                                <a href="{{ url_for('admin_view_chat_log', report_id=report.id) }}" class="btn btn-primary">View Chat Log</a>
-                                <a href="{{ url_for('delete_report', report_id=report.id) }}" class="btn btn-danger">Delete Report</a>
+                                <a href="{{ url_for('admin_view_chat_log', report_id=report.id) }}" class="icon-btn icon-btn-primary"><i class="fas fa-comments"></i></a>
+                                <a href="{{ url_for('delete_report', report_id=report.id) }}" class="icon-btn icon-btn-danger"><i class="fas fa-trash-alt"></i></a>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
                 <div style="margin-top: 20px;">
-                    <button type="submit" name="action" value="delete" class="btn btn-danger">Delete Selected</button>
-                    <button type="submit" name="action" value="update_status" class="btn btn-secondary">Update Status of Selected</button>
+                    <button type="submit" name="action" value="delete" class="icon-btn icon-btn-danger">Delete Selected</button>
+                    <button type="submit" name="action" value="update_status" class="icon-btn icon-btn-success">Update Status of Selected</button>
                 </div>
             </form>
         </div>
