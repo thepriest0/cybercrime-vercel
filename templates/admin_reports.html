@@ -63,7 +63,7 @@
         tr:hover {
             background-color: #f5f5f5;
         }
-        .btn-primary, .btn-danger {
+        .btn-primary, .btn-danger, .btn-secondary {
             padding: 5px 10px;
             border: none;
             border-radius: 3px;
@@ -83,22 +83,14 @@
         .btn-danger:hover {
             background-color: darkred;
         }
-        .search-sort-form {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
+        .btn-secondary {
+            background-color: grey;
         }
-        .search-sort-form input[type="text"] {
-            padding: 5px;
-            width: 200px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
+        .btn-secondary:hover {
+            background-color: darkgrey;
         }
-        .search-sort-form select, .search-sort-form button {
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            cursor: pointer;
+        .btn {
+            margin-right: 5px;
         }
     </style>
 </head>
@@ -113,50 +105,72 @@
     <div class="main-content">
         <div class="container">
             <h1>Admin Reports</h1>
-            
-            <form method="GET" action="{{ url_for('admin_reports') }}" class="search-sort-form">
-                <input type="text" name="search" placeholder="Search" value="{{ request.args.get('search', '') }}">
+            <form method="get" action="{{ url_for('admin_reports') }}">
+                <input type="text" name="search" placeholder="Search..." value="{{ search_query }}">
                 <select name="sort_by">
-                    <option value="id" {% if request.args.get('sort_by') == 'id' %}selected{% endif %}>ID</option>
-                    <option value="fullname" {% if request.args.get('sort_by') == 'fullname' %}selected{% endif %}>User Name</option>
-                    <option value="email" {% if request.args.get('sort_by') == 'email' %}selected{% endif %}>Email</option>
-                    <option value="date" {% if request.args.get('sort_by') == 'date' %}selected{% endif %}>Date</option>
+                    <option value="id" {% if sort_by == 'id' %}selected{% endif %}>ID</option>
+                    <option value="fullname" {% if sort_by == 'fullname' %}selected{% endif %}>Full Name</option>
+                    <option value="email" {% if sort_by == 'email' %}selected{% endif %}>Email</option>
+                    <option value="date" {% if sort_by == 'date' %}selected{% endif %}>Date</option>
+                    <option value="status" {% if sort_by == 'status' %}selected{% endif %}>Status</option>
                 </select>
                 <select name="sort_order">
-                    <option value="asc" {% if request.args.get('sort_order') == 'asc' %}selected{% endif %}>Ascending</option>
-                    <option value="desc" {% if request.args.get('sort_order') == 'desc' %}selected{% endif %}>Descending</option>
+                    <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>Ascending</option>
+                    <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>Descending</option>
                 </select>
                 <button type="submit">Search and Sort</button>
             </form>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Report ID</th>
-                        <th>Full Name</th>
-                        <th>Email Address</th>
-                        <th>Date</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for report in reports %}
-                    <tr>
-                        <td>{{ report.id }}</td>
-                        <td>{{ report.user.fullname }}</td>
-                        <td>{{ report.user.email }}</td>
-                        <td>{{ report.date }}</td>
-                        <td>
-                            <a href="{{ url_for('admin_view_chat_log', report_id=report.id) }}" class="btn-primary">View Chat Log</a>
-                            <form action="{{ url_for('delete_report', report_id=report.id) }}" method="post" style="display:inline;">
-                                <button type="submit" class="btn-danger">Delete Report</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <form method="post" action="{{ url_for('bulk_action') }}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all"></th>
+                            <th>Report ID</th>
+                            <th>Full Name</th>
+                            <th>Email Address</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in reports %}
+                        <tr>
+                            <td><input type="checkbox" name="selected_reports" value="{{ report.id }}"></td>
+                            <td>{{ report.id }}</td>
+                            <td>{{ report.user.fullname }}</td>
+                            <td>{{ report.user.email }}</td>
+                            <td>{{ report.date }}</td>
+                            <td>
+                                <select name="status_{{ report.id }}">
+                                    <option value="New" {% if report.status == 'New' %}selected{% endif %}>New</option>
+                                    <option value="In Progress" {% if report.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                    <option value="Resolved" {% if report.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                                    <option value="Closed" {% if report.status == 'Closed' %}selected{% endif %}>Closed</option>
+                                </select>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin_view_chat_log', report_id=report.id) }}" class="btn btn-primary">View Chat Log</a>
+                                <a href="{{ url_for('delete_report', report_id=report.id) }}" class="btn btn-danger">Delete Report</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px;">
+                    <button type="submit" name="action" value="delete" class="btn btn-danger">Delete Selected</button>
+                    <button type="submit" name="action" value="update_status" class="btn btn-secondary">Update Status of Selected</button>
+                </div>
+            </form>
         </div>
     </div>
+    <script>
+        document.getElementById('select-all').addEventListener('change', function() {
+            var checkboxes = document.querySelectorAll('input[name="selected_reports"]');
+            for (var checkbox of checkboxes) {
+                checkbox.checked = this.checked;
+            }
+        });
+    </script>
 </body>
 </html>

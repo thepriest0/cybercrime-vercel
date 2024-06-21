@@ -1,8 +1,8 @@
-"""Add status to reports
+"""Add status to Report
 
-Revision ID: 7a0c4f4d365c
-Revises: 82e649e6330c
-Create Date: 2024-06-19 23:52:50.562720
+Revision ID: 7deafd387180
+Revises: 93709ffc5fe6
+Create Date: 2024-06-21 07:22:48.697757
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '7a0c4f4d365c'
-down_revision = '82e649e6330c'
+revision = '7deafd387180'
+down_revision = '93709ffc5fe6'
 branch_labels = None
 depends_on = None
 

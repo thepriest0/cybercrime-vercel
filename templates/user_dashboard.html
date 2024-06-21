@@ -134,6 +134,7 @@
                     <tr>
                         <th>Date</th>
                         <th>Chat Log</th>
+                        <th>Status</th> <!-- New Status Column -->
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -142,6 +143,7 @@
                     <tr>
                         <td>{{ report.date.strftime('%Y-%m-%d') }}</td>
                         <td>{{ report.chat_log[:50] }}...</td>
+                        <td>{{ report.status }}</td> <!-- Display Status -->
                         <td><a href="{{ url_for('user_view_chat_log', report_id=report.id) }}">View Chat Log</a></td>
                     </tr>
                     {% endfor %}
