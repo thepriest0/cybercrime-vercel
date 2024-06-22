@@ -17,11 +17,13 @@
         }
         .container {
             max-width: 800px;
+            width: 100%;
             margin: 0 auto;
             padding: 20px;
             background-color: #fff;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
         }
         h1 {
             text-align: center;
@@ -36,10 +38,18 @@
             font-family: monospace;
             height: 400px;
             overflow-y: auto;
+            box-sizing: border-box;
         }
-        a {
-            text-decoration: none;
+        .chat-line {
+            margin-bottom: 10px;
+        }
+        .user-name {
             color: #007bff;
+            font-weight: bold;
+        }
+        .bot-name {
+            color: #28a745;
+            font-weight: bold;
         }
         .back-link {
             text-align: center;
@@ -49,6 +59,44 @@
             text-decoration: none;
             color: #007bff;
             font-size: 16px;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design Adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 24px;
+                margin-bottom: 15px;
+            }
+            .chat-log {
+                height: 300px;
+                padding: 10px;
+            }
+            .back-link a {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 20px;
+                margin-bottom: 10px;
+            }
+            .chat-log {
+                height: 200px;
+                padding: 5px;
+            }
+            .back-link a {
+                font-size: 12px;
+            }
         }
     </style>
 </head>
