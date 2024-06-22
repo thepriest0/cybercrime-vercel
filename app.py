@@ -10,6 +10,7 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'doc', 'docx'}
@@ -344,6 +345,7 @@ def report():
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
+    # Initialize session variables if not already set
     if 'chat_state' not in session:
         session['chat_state'] = 0
         session['chat_log'] = []
@@ -369,8 +371,10 @@ def report():
                     session['chat_state'] += 1
                 else:
                     response = "Invalid file type. Please upload a valid file."
+                    return render_template('report.html', chat_log=session.get('chat_log', []), response=response)
             else:
                 response = "No file uploaded. Please upload a file."
+                return render_template('report.html', chat_log=session.get('chat_log', []), response=response)
         else:
             session['chat_log'].append(f"User: {user_input}")
             session['chat_state'] += 1
@@ -387,15 +391,13 @@ def report():
             )
             db.session.add(new_report)
             db.session.commit()  # Commit the report to the database
-            response = "Your report has been successfully submitted. Thank you!"
-            session.pop('chat_state')
-            session.pop('chat_log')
-            session.pop('evidence_filename')
-
-        return render_template('report.html', chat_log=session['chat_log'], response=response)
+            session.pop('chat_state', None)
+            session.pop('chat_log', None)
+            session.pop('evidence_filename', None)
+            return redirect(url_for('user_dashboard'))  # Redirect to user dashboard
 
     response = chat_flow[session['chat_state']]
-    return render_template('report.html', chat_log=session['chat_log'], response=response)
+    return render_template('report.html', chat_log=session.get('chat_log', []), response=response)
 
 if __name__ == '__main__':
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
