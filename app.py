@@ -7,10 +7,13 @@ from flask_login import UserMixin
 import logging
 import os
 from werkzeug.utils import secure_filename
-from config import Config
 
 app = Flask(__name__)
-app.config.from_object(Config)  # Use the config class
+app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://cybercrime_user:iVk5T18JBYdeAmHLvLn32nWMnr4FZlBq@dpg-cpql41aj1k6c73bic3b0-a/cybercrime'
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'doc', 'docx'}
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
