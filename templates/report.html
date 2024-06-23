@@ -65,11 +65,21 @@
             background: #f9f9f9;
             padding: 10px 15px;
         }
-        .chat-input input[type="text"], .chat-input input[type="file"] {
+        .chat-input input[type="text"] {
             flex: 1;
             padding: 10px;
             border: none;
             border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+            background: #fff;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            margin-right: 10px;
+        }
+        .chat-input input[type="file"] {
+            flex: 1;
+            padding: 10px;
+            border: none;
             outline: none;
             font-size: 14px;
             background: #fff;
@@ -103,46 +113,6 @@
         }
         .chat-log::-webkit-scrollbar-track {
             background: #e9ecef;
-        }
-
-        /* Media Queries for Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                width: 90%;
-                height: 90vh;
-            }
-            .chat-header {
-                font-size: 18px;
-            }
-            .chat-log p {
-                font-size: 12px;
-            }
-            .chat-input input[type="text"], .chat-input input[type="file"], .chat-input button {
-                font-size: 12px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                width: 100%;
-                height: 100vh;
-            }
-            .chat-header {
-                font-size: 16px;
-                padding: 10px;
-            }
-            .chat-log p {
-                font-size: 10px;
-            }
-            .chat-input input[type="text"], .chat-input input[type="file"] {
-                padding: 8px;
-                font-size: 10px;
-                margin-right: 5px;
-            }
-            .chat-input button {
-                padding: 8px 16px;
-                font-size: 10px;
-            }
         }
     </style>
 </head>
