@@ -1,5 +1,3 @@
 #!/bin/bash
-# Apply database migrations
-flask db upgrade
-# Start the Flask application
-exec gunicorn -b :$PORT app:app
+flask db upgrade  # Apply database migrations
+gunicorn -w 4 -b 0.0.0.0:8000 app:app  # Start the Gunicorn server
