@@ -10,9 +10,8 @@ from werkzeug.utils import secure_filename
 from config import Config
 
 app = Flask(__name__)
-app.config.from_object(Config)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'doc', 'docx'}
+app.config.from_object(Config)  # Use the config class
+
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
@@ -87,7 +86,6 @@ def user_dashboard():
 
     return render_template('user_dashboard.html', user=current_user, reports=reports)
 
-
 @app.route('/user_settings', methods=['GET', 'POST'])
 def user_settings():
     if 'user_id' not in session:
@@ -119,7 +117,7 @@ def admin_dashboard():
 
     total_users = User.query.count()
     total_reports = Report.query.count()
-    visits = 0 # Implement a visit count logic if necessary
+    visits = 0  # Implement a visit count logic if necessary
 
     return render_template('admin_dashboard.html', total_users=total_users, total_reports=total_reports, visits=visits)
 
@@ -259,10 +257,8 @@ def delete_user(user_id):
 
 @app.route('/delete_report/<int:report_id>', methods=['POST'])
 def delete_report(report_id):
-    report = Report.query.get_or_404(report_id)
-    db.session.delete(report)
-    db.session.commit()
-    return redirect(url_for('admin_dashboard'))
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
 
     current_user = User.query.get(session['user_id'])
     if not current_user.is_admin:
@@ -398,6 +394,18 @@ def report():
     response = chat_flow[session['chat_state']]
     return render_template('report.html', chat_log=session.get('chat_log', []), response=response)
 
+@app.route('/test_url/<filename>')
+def test_url(filename):
+    try:
+        file_url = url_for('uploaded_file', filename=filename)
+        return f"URL: {file_url}"
+    except Exception as e:
+        return str(e)
+
+@app.route('/test_template/<filename>')
+def test_template(filename):
+    return render_template('test_template.html', filename=filename)
+
 if __name__ == '__main__':
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
         os.makedirs(app.config['UPLOAD_FOLDER'])
@@ -415,22 +423,4 @@ if __name__ == '__main__':
             db.session.add(admin_user)
             db.session.commit()
 
-    app.run(debug=True)
-
-
-@app.route('/test_url/<filename>')
-def test_url(filename):
-    try:
-        file_url = url_for('uploaded_file', filename=filename)
-        return f"URL: {file_url}"
-    except Exception as e:
-        return str(e)
-
-@app.route('/test_template/<filename>')
-def test_template(filename):
-    return render_template('test_template.html', filename=filename)
-
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()  # Create tables for all models
     app.run(debug=True)
