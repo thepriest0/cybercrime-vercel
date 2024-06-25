@@ -46,6 +46,19 @@
             text-align: center;
             color: #333;
         }
+        .create-user-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .create-user-btn:hover {
+            background-color: #218838;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -88,6 +101,7 @@
     <div class="main-content">
         <div class="container">
             <h1>Admin Users</h1>
+            <a href="{{ url_for('create_user') }}" class="create-user-btn">Create New User</a>
             <table>
                 <thead>
                     <tr>

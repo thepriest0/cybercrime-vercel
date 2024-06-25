@@ -120,9 +120,37 @@ def admin_dashboard():
 
     total_users = User.query.count()
     total_reports = Report.query.count()
-    visits = 0  # Implement a visit count logic if necessary
+    visits = get_total_visits()  # You need to implement this function
+    growth_rate = calculate_growth_rate()  # Implement this function
+    unresolved_issues = get_unresolved_issues_count()  # Implement this function
+    resolved_issues = get_resolved_issues_count()  # Implement this function
 
-    return render_template('admin_dashboard.html', total_users=total_users, total_reports=total_reports, visits=visits)
+   
+    return render_template('admin_dashboard.html',
+                           total_users=total_users,
+                           total_reports=total_reports,
+                           visits=visits,
+                           growth_rate=growth_rate,
+                           unresolved_issues=unresolved_issues,
+                           resolved_issues=resolved_issues)
+
+def get_total_visits():
+    # Implement logic to get total visits
+    return 1234  # Example value
+
+def calculate_growth_rate():
+    # Implement logic to calculate growth rate
+    return "5%"  # Example value
+
+def get_unresolved_issues_count():
+    # Implement logic to count unresolved issues
+    unresolved_issues = Report.query.filter_by(status='unresolved').count()  # Example query
+    return unresolved_issues
+
+def get_resolved_issues_count():
+    # Implement logic to count resolved issues
+    resolved_issues = Report.query.filter_by(status='resolved').count()  # Example query
+    return resolved_issues
 
 @app.route('/admin_settings', methods=['GET', 'POST'])
 def admin_settings():
@@ -146,6 +174,35 @@ def admin_settings():
         return redirect(url_for('admin_settings'))
 
     return render_template('admin_settings.html', admin_email=current_user.email)
+
+@app.route('/create_user', methods=['GET', 'POST'])
+def create_user():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    current_user = User.query.get(user_id)
+    if not current_user.is_admin:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        fullname = request.form['fullname']
+        email = request.form['email']
+        password = request.form['password']
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+
+        # Check if user already exists
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            # Handle the case where the user already exists
+            return "User with this email already exists."
+
+        new_user = User(fullname=fullname, email=email, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()  # Commit the user to the database
+        return redirect(url_for('admin_users'))
+
+    return render_template('create_user.html')
 
 @app.route('/admin/reports', methods=['GET'])
 def admin_reports():
