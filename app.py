@@ -143,13 +143,13 @@ def calculate_growth_rate():
     return "5%"  # Example value
 
 def get_unresolved_issues_count():
-    # Implement logic to count unresolved issues
-    unresolved_issues = Report.query.filter_by(status='unresolved').count()  # Example query
+    # Ensure the status value matches the ones used in your application
+    unresolved_issues = Report.query.filter(Report.status.in_(['Pending', 'unresolved'])).count()
     return unresolved_issues
 
 def get_resolved_issues_count():
-    # Implement logic to count resolved issues
-    resolved_issues = Report.query.filter_by(status='resolved').count()  # Example query
+    # Ensure the status value matches the ones used in your application
+    resolved_issues = Report.query.filter(Report.status.in_(['resolved', 'Resolved'])).count()
     return resolved_issues
 
 @app.route('/admin_settings', methods=['GET', 'POST'])
