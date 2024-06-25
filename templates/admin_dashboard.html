@@ -83,30 +83,6 @@
             font-size: 2em;
             color: #007bff;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #fff;
-            border-radius: 5px;
-            overflow: hidden;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #007bff;
-            color: #fff;
-        }
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-        a.table-action {
-            color: #007bff;
-            text-decoration: none;
-        }
         /* Mobile Styles */
         @media (max-width: 768px) {
             .body {
@@ -150,26 +126,6 @@
                 margin: 10px 0;
                 width: 100%;
             }
-            table {
-                display: block;
-                overflow-x: auto;
-                width: 100%;
-            }
-            table thead, table tbody {
-                display: block;
-            }
-            table thead {
-                float: left;
-                margin-right: 10px;
-            }
-            table tbody {
-                white-space: nowrap;
-            }
-            table th, table td {
-                white-space: nowrap;
-                display: inline-block;
-                min-width: 100px;
-            }
         }
     </style>
 </head>
@@ -203,26 +159,22 @@
                 <h3>{{ visits }}</h3>
                 <p>Visits</p>
             </div>
+            <div class="stat-card">
+                <i class="fas fa-chart-line"></i>
+                <h3>{{ growth_rate }}</h3>
+                <p>Growth Rate</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-bug"></i>
+                <h3>{{ unresolved_issues }}</h3>
+                <p>Unresolved Issues</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-check-circle"></i>
+                <h3>{{ resolved_issues }}</h3>
+                <p>Resolved Issues</p>
+            </div>
         </div>
-        <h2>Users</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Full Name</th>
-                    <th>Email Address</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                    <tr>
-                        <td>{{ user.fullname }}</td>
-                        <td>{{ user.email }}</td>
-                        <td><a href="{{ url_for('delete_user', user_id=user.id) }}" class="table-action">Delete User</a></td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
     </div>
 
     <script>
