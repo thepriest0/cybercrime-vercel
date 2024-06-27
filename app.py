@@ -384,10 +384,10 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 chat_flow = [
-    "Hi! I'm your report assistant, Can you fully describe what happened?",
-    "When did this happen? Please reply with the date.",
-    "Please enter your contact number.",
-    "Please upload evidence of the incident.",
+    "Hello, I'm your report assistant! Can you fully describe your incident? Please don't leave any details out.",
+    "Got that! When did this incident occur?",
+    "Please provide your contact number.",
+    "Please provide evidence of incidence to aid our investigation (You can compile your screenshots in a pdf and upload should in case you have multiple!)",
     "Report received. Please type 'done' to finish."
 ]
 
