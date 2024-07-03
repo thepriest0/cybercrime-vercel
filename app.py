@@ -33,6 +33,7 @@ class Report(db.Model):
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     evidence_filename = db.Column(db.String(200), nullable=True)
     status = db.Column(db.String(50), nullable=False, default='Pending')  # New status column
+    feedback = db.Column(db.Text, nullable=True)
 
 @app.route('/')
 def index():
@@ -351,13 +352,12 @@ def user_view_chat_log(report_id):
     chat_log_lines = report.chat_log.split('\n')
     return render_template('user_view_chat_log.html', report=report, user=user, chat_log_lines=chat_log_lines)
 
-@app.route('/admin_view_chat_log/<int:report_id>', methods=['GET', 'POST'])
+@app.route('/admin_view_chat_log/<int:report_id>')
 def admin_view_chat_log(report_id):
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
-    user_id = session['user_id']
-    current_user = User.query.get(user_id)
+    current_user = User.query.get(session['user_id'])
     if not current_user.is_admin:
         return redirect(url_for('login'))
 
@@ -369,15 +369,24 @@ def admin_view_chat_log(report_id):
     if not user:
         return "User not found", 404
 
-    if request.method == 'POST':
-        new_status = request.form.get('status')
-        if new_status:
-            report.status = new_status
-            db.session.commit()
-            return redirect(url_for('admin_view_chat_log', report_id=report_id))
-
     chat_log_lines = report.chat_log.split('\n')
+
     return render_template('admin_view_chat_log.html', report=report, user=user, chat_log_lines=chat_log_lines)
+
+@app.route('/admin_provide_feedback/<int:report_id>', methods=['POST'])
+def admin_provide_feedback(report_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    current_user = User.query.get(session['user_id'])
+    if not current_user.is_admin:
+        return redirect(url_for('login'))
+
+    report = Report.query.get(report_id)
+    if report:
+        report.feedback = request.form['feedback']
+        db.session.commit()
+    return redirect(url_for('admin_view_chat_log', report_id=report_id))
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):

@@ -68,6 +68,12 @@
                 </div>
             {% endfor %}
         </div>
+        {% if report.feedback %}
+        <div class="feedback">
+            <h3>Admin Feedback:</h3>
+            <p>{{ report.feedback }}</p>
+        </div>
+        {% endif %}
         <div class="back-link">
             <p><a href="{{ url_for('user_dashboard') }}">Back to User Dashboard</a></p>
         </div>
